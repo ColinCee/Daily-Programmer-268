@@ -14,19 +14,15 @@ public class ClientThread implements Runnable {
 	public void run() {
 
 		try {
-			while(true){
-				String response = client.getServerResponse();
-				if(response.contains("Closing")){
-					client.closeConnection();
-					break;
-				}
+			String response = client.getServerResponse();
+			if(response.contains("Closing"))
+				client.closeConnection();
+			else
 				System.out.println(response);
-			}
 		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 }

@@ -30,9 +30,8 @@ public class ServerThread implements Runnable {
 			String message = conn.getOis().readObject().toString();
 			
 			while(!message.contains("/close")){
-				message =  conn.getOis().readObject().toString();
 				parseCommands(message);
-				
+				message =  conn.getOis().readObject().toString();
 			}	
 			
 			server.deleteUser(username);
@@ -67,6 +66,9 @@ public class ServerThread implements Runnable {
 				usersOnline = usersOnline.substring(0, usersOnline.length()-2);
 				sendMessage(usersOnline, conn);
 				break;
+			case "/ping":
+				sendMessage("ping response", conn);
+				break;
 			case "/close":
 				sendMessage("Closing connection", conn);
 				break;
@@ -84,7 +86,7 @@ public class ServerThread implements Runnable {
 			 username = conn.getOis().readObject().toString();
 		}
 		
-		sendMessage("Welcome, " + username + " \n" + "Commands are: /broadcast, /online, /close", conn);
+		sendMessage("Welcome, " + username + " \n" + "Commands are: /broadcast, /online, /close, /ping", conn);
 		
 		return username;
 	}

@@ -11,6 +11,7 @@ package main;
 
 import java.net.*;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 import java.io.*;
 
 public class Client {
@@ -18,13 +19,45 @@ public class Client {
 	private Socket socket;
 	private ObjectOutputStream objectOutput;
 	private ObjectInputStream objectInput;
+	private Scanner scan;
 
-	public Client(String ip, int port) throws IOException {
+	public Client(String ip, int port) throws IOException, ClassNotFoundException{
 		socket = new Socket(ip, port);
 		objectOutput = new ObjectOutputStream(socket.getOutputStream());
 		objectInput = new ObjectInputStream(socket.getInputStream());
+		scan = new Scanner(System.in);
+		setUsername();
 	}
 	
+	public void setUsername() throws ClassNotFoundException, IOException{
+
+		String message = "";
+		System.out.println("Please enter your username:");
+		sendMessage(scan.nextLine());
+		String response = getServerResponse();
+		System.out.println(response);
+		
+		while(response.contains("taken")){
+			System.out.println("Please enter another username: ");
+			message = scan.nextLine();
+			sendMessage(message);
+			response = getServerResponse();
+			System.out.println(response);
+		}
+		
+	}
+	
+	public long pingServer() throws IOException, ClassNotFoundException{
+		long startTime = System.currentTimeMillis();
+		System.out.println("Pinging...");
+		sendMessage("/ping");
+		System.out.println(getServerResponse());
+		
+		long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        
+		return elapsedTime;
+	}
 	public void sendMessage(String message) throws IOException {
 		
 		objectOutput.writeObject(message);
@@ -39,6 +72,10 @@ public class Client {
 		return socket;
 	}
 	
+	public Scanner getScanner() {
+		return scan;
+	}
+
 	public void closeConnection() throws IOException{
 		
 		objectOutput.close();
@@ -50,33 +87,30 @@ public class Client {
 
 		try {
 			String message = "";
-			Scanner scan = new Scanner(System.in);
+			StringTokenizer st = null;
 			Client client = new Client("86.149.131.88", 10);
-			Thread clientThread = new Thread(new ClientThread(client));
+			Scanner scan = client.getScanner();
 			
-			System.out.println("Please enter your username:");
-			message = scan.nextLine();
-			client.sendMessage(message);
-			String response = client.getServerResponse();
-			System.out.println(response);
-			
-			while(response.contains("taken")){
-				System.out.println("Please enter another username: ");
+			do {			
 				message = scan.nextLine();
-				client.sendMessage(message);
-				response = client.getServerResponse();
-				System.out.println(response);
-			}
-			
-			clientThread.start();
-			do {
-				while (message.isEmpty()) {
-					System.out.println("Input is empty please try again:");
-					message = scan.nextLine();
+				st = new StringTokenizer(message);
+				
+				if(st.nextToken().equals("/ping")){
+					System.out.println("Ping time: " + client.pingServer() + " ms");
 				}
-
-				client.sendMessage(message);
-				message = scan.nextLine();
+				else{
+					Thread clientThread = new Thread(new ClientThread(client));
+					clientThread.start();
+					
+					while (message.isEmpty()) {
+						System.out.println("Input is empty please try again:");
+						message = scan.nextLine();
+					}
+					
+					System.out.println("Message sent was: " + message);
+					client.sendMessage(message);
+					
+				}
 
 			} while (!message.contains("/close"));
 
