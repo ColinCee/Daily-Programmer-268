@@ -13,5 +13,5 @@ Let the client identify itself (username) - Yep
 
 Create a way to list all connected clients - Yep
 
-Send messages to the server and relay it to a requested client - Nope
+Send messages to the server and relay it to a requested client - Yep
 
