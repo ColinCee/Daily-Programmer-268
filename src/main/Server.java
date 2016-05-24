@@ -10,9 +10,13 @@
  * @author Colin Cheung
  */
 package main;
+
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,58 +24,69 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Server extends Thread implements Runnable {
-	
-	private Map<String, Socket> clientMap;
+public class Server {
 
-	public Server() throws IOException{
+	private Map<String, Connection> clientMap;
+
+    private SimpleDateFormat sdf;
+	public Server() throws IOException {
+
+		clientMap = new HashMap<String, Connection>();
 		
-		clientMap = new HashMap<String, Socket>();
+		sdf = new SimpleDateFormat("'['dd.MM HH:mm:ss']'");
+
 	}
 
-	
-	public synchronized Map<String, Socket> getClientMap() {
+	public synchronized Map<String, Connection> getClientMap() {
 		return clientMap;
 	}
 
+	public synchronized boolean addUser(String username, Connection conn) throws IOException, ClassNotFoundException {
 
-	public synchronized boolean addUser(String username, Socket socket) {
-		
-		if(!clientMap.containsKey(username)){
-			System.out.println("User: " + username + " added");
-			clientMap.put(username, socket);
+		if (!clientMap.containsKey(username)) {
+			System.out.println(getTimeStamp() + " User: " + username + " added");
+			clientMap.put(username, conn);
 			return true;
-		}
-		else
+		} else
 			return false;
-		
+
 	}
+
 	public synchronized void deleteUser(String username) {
+		System.out.println(getTimeStamp() + " User: " + username + " deleted");
 		clientMap.remove(username);
 	}
 	
-
-	public static void main(String[] args) throws IOException{
-		Server server = new Server();
+	public String getTimeStamp(){
+		Date date = new Date();
+		return(sdf.format(date));
+	}
+	
+	public static void main(String[] args) {
 		int port = 10;
-		
 		ServerSocket serverSock = null;
-		//Create new fixed thread pool
+		// Create new fixed thread pool
 		ExecutorService executor = Executors.newFixedThreadPool(16);
+
 		try {
-			//Create new server socket at port 10
+			Server server = new Server();
+			// Create new server socket at port 10
 			serverSock = new ServerSocket(port);
-			System.out.println("Waiting for Client on Port: " + serverSock.getLocalPort());
-			//While true loop allows the class to accept any clients on port 10
-			while(true){
-				
-				//Accept the client and then use executor to assign a new thread to perform...
-				//the server response.
+			System.out.println(server.getTimeStamp() + " Waiting for Client on Port: " + serverSock.getLocalPort());
+			// While true loop allows the class to accept any clients on port 10
+			while (true) {
 				Socket cSock = serverSock.accept();
 				executor.execute(new ServerThread(cSock, server));
 			}
 		} catch (IOException e) {
 			System.err.println("IOException: " + e.getMessage());
+		} finally {
+			try {
+				serverSock.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 }

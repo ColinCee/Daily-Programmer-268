@@ -5,9 +5,9 @@ https://www.reddit.com/r/dailyprogrammer/comments/4knivr/20160523_challenge_268_
 
 This is a Java implementation of the daily challenge, it is multithreaded server that has some of the bonuses as shown below:
 
-Make the server broadcast it's existince on the network, so clients can detect him. - I don't know how to do this :/
+Make the server broadcast it's existince on the network, so clients can detect him. - Requires research
 
-Send messages to the server and broadcast it to all the clients - Nope
+Send messages to the server and broadcast it to all the clients - Yep
 
 Let the client identify itself (username) - Yep
 

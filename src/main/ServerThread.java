@@ -3,6 +3,7 @@ package main;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
@@ -10,41 +11,33 @@ public class ServerThread implements Runnable {
 	
 	private Socket socket;
 	private Server server;
-	private ObjectOutputStream objectOutput;
-	private ObjectInputStream objectInput;
+	private Connection conn;
 	
 	
 	public ServerThread(Socket clientSocket, Server server) throws IOException{
 		this.server = server;
 		socket = clientSocket;
-		objectOutput = new ObjectOutputStream(socket.getOutputStream());
-		objectInput = new ObjectInputStream(socket.getInputStream());
+		conn = new Connection(socket);
 	}
+	
 	@Override
 	public void run() {
 		try {
-			System.out.println("Client connection established to: " + socket.getRemoteSocketAddress());
+			System.out.println(server.getTimeStamp() + " Client connection established to: " + socket.getRemoteSocketAddress());
 			
-			String message = " ";
-			String username = objectInput.readObject().toString();
-			if(!server.addUser(username, socket))
-				sendMessage("Username:" + username + " taken");
-			else{
-				sendMessage("Welcome, " + username + " \n" + "Commands are: /broadcast, /online");
-			}
-				
-			do{
-				message =  objectInput.readObject().toString();
-				System.out.println("Client sends: " + message);
+			
+			String username = getUsername();
+			String message = conn.getOis().readObject().toString();
+			
+			while(!message.contains("/close")){
+				message =  conn.getOis().readObject().toString();
 				parseCommands(message);
 				
-			}while(!message.contains("/close"));	
+			}	
 			
-			System.out.println("Closing connection");
 			server.deleteUser(username);
-			objectOutput.close();
-			objectInput.close();
-			socket.close();
+			conn.close();
+			
 		}
 		catch (IOException | ClassNotFoundException e) {
 			System.err.println("Exception: " + e.getMessage());
@@ -55,31 +48,49 @@ public class ServerThread implements Runnable {
 		StringTokenizer st = new StringTokenizer(message);
 		String command = st.nextToken(" ");
 		
+		
 		switch(command){
 			case "/broadcast":	
-				System.out.println("Broadcast requested");
+				System.out.println(server.getTimeStamp() + " Broadcast requested");
+				String body = "Server wide brodcast: ";
+				body += message.substring(command.length());
+				for(String user : server.getClientMap().keySet())
+					sendMessage(body, server.getClientMap().get(user));
+				
 				break;
 			case "/online":
-				String usersOnline = "";
+				String usersOnline = "Users online: ";
 				for(String user : server.getClientMap().keySet())
 					usersOnline += user + ", ";
-				sendMessage(usersOnline);
+				
+				//Get rid of last comma
+				usersOnline = usersOnline.substring(0, usersOnline.length()-2);
+				sendMessage(usersOnline, conn);
 				break;
 			case "/close":
-				sendMessage("Closing connection");
+				sendMessage("Closing connection", conn);
 				break;
 			default: 
-				sendMessage("Message successfully received, but no action taken");
+				sendMessage("Message successfully received, but no action taken", conn);
 				break;
 		}
 	}
-	private void sendMessage(String message) throws IOException{
-		//Create a new ObjectOutputStream and use the socket's output stream...
-		//then get the character and digits counts using the MessageImpl class...
-		//and finally writing the MessageImpl object to the socket's output stream.
+	
+	private String getUsername() throws ClassNotFoundException, IOException {
+		String username = conn.getOis().readObject().toString();
 		
-		objectOutput.writeObject(message);
+		while(!server.addUser(username, conn)){
+			 sendMessage("Username: " + username + " taken", conn);
+			 username = conn.getOis().readObject().toString();
+		}
 		
+		sendMessage("Welcome, " + username + " \n" + "Commands are: /broadcast, /online, /close", conn);
+		
+		return username;
+	}
+	
+	private void sendMessage(String message, Connection conn) throws IOException{		
+		conn.getOos().writeObject(message);
 	}
 
 }
