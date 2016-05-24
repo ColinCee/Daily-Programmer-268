@@ -1,13 +1,10 @@
 /** 
- * This server class creates a server socket on port 6100
+ * This server class creates a server socket on port 10
  * and waits for a client to connect. Once connected it
- * retrieves the message from the socket input stream
- * and uses the MessageImpl class to get the count of
- * characters and digits. Then finally it sends the
- * MessageImpl class back using the socket's output
- * stream.
+ * retrieves sends and receives messages to and from the
+ * client until an exit command is received.
  * 
- * Note that this implementation uses a cached thread
+ * Note that this implementation uses a fixed thread
  * pool.
  * 
  * @author Colin Cheung
@@ -59,19 +56,19 @@ public class Server extends Thread implements Runnable {
 		int port = 10;
 		
 		ServerSocket serverSock = null;
-		//Create new cached thread pool
+		//Create new fixed thread pool
 		ExecutorService executor = Executors.newFixedThreadPool(16);
 		try {
-			//Create new server socket at port 6100
+			//Create new server socket at port 10
 			serverSock = new ServerSocket(port);
 			System.out.println("Waiting for Client on Port: " + serverSock.getLocalPort());
-			//While true loop allows the class to accept any clients on port 6100
+			//While true loop allows the class to accept any clients on port 10
 			while(true){
 				
 				//Accept the client and then use executor to assign a new thread to perform...
 				//the server response.
 				Socket cSock = serverSock.accept();
-				executor.execute(new ClientThread(cSock, server));
+				executor.execute(new ServerThread(cSock, server));
 			}
 		} catch (IOException e) {
 			System.err.println("IOException: " + e.getMessage());

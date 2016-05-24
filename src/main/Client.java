@@ -1,7 +1,8 @@
 /** 
- * This client class takes a message from the user and sends 
- *  it to the server then waits for the server to respond with 
- *  how many characters and digits the message contains.
+ * This client class takes input from the user and sends 
+ *  it to the server then waits for the server to respond.
+ *  This process repeats until the client sends a closing
+ *  command.
  *
  * @author Colin Cheung
  * 
@@ -25,33 +26,17 @@ public class Client {
 		objectOutput = new ObjectOutputStream(socket.getOutputStream());
 		objectInput = new ObjectInputStream(socket.getInputStream());
 	}
-
-	/**
-	 * @param message
-	 *            The message to be sent to the server
-	 * @throws IOException
-	 */
+	
 	public void sendMessage(String message) throws IOException {
-		// Create a new ObjectOutputStream and use the socket's output stream...
-		// then write the message object (string) to it.
 		
 		objectOutput.writeObject(message);
 	}
 
 	public String getServerResponse() throws IOException, ClassNotFoundException {
-		// Create a new ObjectInputStream and use the socket's input stream...
-		// then read the MessageImpl object and print the amount of
-		// characters...
-		// and digits.
 
 		return objectInput.readObject().toString();
 	}
 
-	/*
-	 * This main method currently only uses a pre-set message to send to the
-	 * server. If you would like to type into the console then uncomment
-	 * everything in this method and then comment out the original 2 lines.
-	 */
 	public Socket getSocket() {
 		return socket;
 	}

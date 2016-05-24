@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.StringTokenizer;
 
-public class ClientThread implements Runnable {
+public class ServerThread implements Runnable {
 	
 	private Socket socket;
 	private Server server;
@@ -14,7 +14,7 @@ public class ClientThread implements Runnable {
 	private ObjectInputStream objectInput;
 	
 	
-	public ClientThread(Socket clientSocket, Server server) throws IOException{
+	public ServerThread(Socket clientSocket, Server server) throws IOException{
 		this.server = server;
 		socket = clientSocket;
 		objectOutput = new ObjectOutputStream(socket.getOutputStream());

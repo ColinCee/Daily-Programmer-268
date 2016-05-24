@@ -1,5 +1,7 @@
-# Daily-Programmer-268-Easy
+# Daily-Programmer-268
 https://www.reddit.com/r/dailyprogrammer/comments/4knivr/20160523_challenge_268_easy_network_and_cards/
+
+----- Easy -----
 
 This is a Java implementation of the daily challenge, it is multithreaded server that has some of the bonuses as shown below:
 
