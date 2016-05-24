@@ -44,7 +44,7 @@ public class Server {
 	public synchronized boolean addUser(String username, Connection conn) throws IOException, ClassNotFoundException {
 
 		if (!clientMap.containsKey(username)) {
-			System.out.println(getTimeStamp() + " User: " + username + " added");
+			System.out.println(getTimeStamp() + " User: " + username + " connected");
 			clientMap.put(username, conn);
 			return true;
 		} else
@@ -53,7 +53,7 @@ public class Server {
 	}
 
 	public synchronized void deleteUser(String username) {
-		System.out.println(getTimeStamp() + " User: " + username + " deleted");
+		System.out.println(getTimeStamp() + " User: " + username + " disconnected");
 		clientMap.remove(username);
 	}
 	

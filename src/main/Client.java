@@ -47,16 +47,11 @@ public class Client {
 		
 	}
 	
-	public long pingServer() throws IOException, ClassNotFoundException{
+	public void pingServer() throws IOException, ClassNotFoundException{
 		long startTime = System.currentTimeMillis();
 		System.out.println("Pinging...");
-		sendMessage("/ping");
-		System.out.println(getServerResponse());
-		
-		long stopTime = System.currentTimeMillis();
-        long elapsedTime = stopTime - startTime;
-        
-		return elapsedTime;
+		sendMessage("/ping " + startTime);
+
 	}
 	public void sendMessage(String message) throws IOException {
 		
@@ -91,23 +86,21 @@ public class Client {
 			Client client = new Client("86.149.131.88", 10);
 			Scanner scan = client.getScanner();
 			
+			Thread clientThread = new Thread(new ClientThread(client));
+			clientThread.start();
+			
 			do {			
 				message = scan.nextLine();
 				st = new StringTokenizer(message);
 				
-				if(st.nextToken().equals("/ping")){
-					System.out.println("Ping time: " + client.pingServer() + " ms");
-				}
+				if(st.nextToken().equals("/ping"))
+					client.pingServer();
 				else{
-					Thread clientThread = new Thread(new ClientThread(client));
-					clientThread.start();
-					
 					while (message.isEmpty()) {
 						System.out.println("Input is empty please try again:");
 						message = scan.nextLine();
 					}
-					
-					System.out.println("Message sent was: " + message);
+
 					client.sendMessage(message);
 					
 				}

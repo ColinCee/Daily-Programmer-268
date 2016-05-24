@@ -30,7 +30,7 @@ public class ServerThread implements Runnable {
 			String message = conn.getOis().readObject().toString();
 			
 			while(!message.contains("/close")){
-				parseCommands(message);
+				parseCommands(message, username);
 				message =  conn.getOis().readObject().toString();
 			}	
 			
@@ -43,31 +43,29 @@ public class ServerThread implements Runnable {
 		}
 	}	
 	
-	private void parseCommands(String message) throws IOException {
+	private void parseCommands(String message, String username) throws IOException {
 		StringTokenizer st = new StringTokenizer(message);
 		String command = st.nextToken(" ");
 		
-		
 		switch(command){
 			case "/broadcast":	
-				System.out.println(server.getTimeStamp() + " Broadcast requested");
-				String body = "Server wide brodcast: ";
-				body += message.substring(command.length());
-				for(String user : server.getClientMap().keySet())
-					sendMessage(body, server.getClientMap().get(user));
-				
+				String broadcastMsg = "Server wide brodcast: ";
+				broadcastMsg += message.substring(command.length());
+				cmdBroadcast(broadcastMsg);
 				break;
 			case "/online":
-				String usersOnline = "Users online: ";
-				for(String user : server.getClientMap().keySet())
-					usersOnline += user + ", ";
+				cmdOnline();
+				break;
+			case "/msg":
+				String recipient = st.nextToken(" ");
+				String msg = "User " + username + " says: ";
+				msg += message.substring(command.length() + recipient.length() + 2, message.length()); 
 				
-				//Get rid of last comma
-				usersOnline = usersOnline.substring(0, usersOnline.length()-2);
-				sendMessage(usersOnline, conn);
+				cmdMessage(recipient, msg);
 				break;
 			case "/ping":
-				sendMessage("ping response", conn);
+				String sendTime = st.nextToken();
+				sendMessage("pingback " + sendTime, conn);
 				break;
 			case "/close":
 				sendMessage("Closing connection", conn);
@@ -78,6 +76,44 @@ public class ServerThread implements Runnable {
 		}
 	}
 	
+	//Send the broadcasted message to each user
+	private void cmdBroadcast(String broadcastMsg) throws IOException {
+		System.out.println(server.getTimeStamp() + " Broadcast requested");
+		
+		for(String user : server.getClientMap().keySet())
+			sendMessage(broadcastMsg, server.getClientMap().get(user));
+		
+	}
+	
+	//Returns all users currently online
+	private void cmdOnline() throws IOException {
+		String usersOnline = "Users online: ";
+		for(String user : server.getClientMap().keySet())
+			usersOnline += user + ", ";
+		
+		//Get rid of last comma
+		usersOnline = usersOnline.substring(0, usersOnline.length()-2);
+		sendMessage(usersOnline, conn);
+		
+	}
+	
+	//Relays a message to a user
+	private void cmdMessage(String recipient, String msg) throws IOException {
+		
+		boolean userFound = false;
+		for(String user : server.getClientMap().keySet())
+			if(user.equals(recipient)){
+				sendMessage(msg, server.getClientMap().get(user));
+				userFound = true;
+				break;
+			}
+		
+		if(!userFound)
+			sendMessage("User " + recipient + " was not found", conn);
+		
+	}
+	
+	//Lets the user identify themselves
 	private String getUsername() throws ClassNotFoundException, IOException {
 		String username = conn.getOis().readObject().toString();
 		
@@ -86,7 +122,7 @@ public class ServerThread implements Runnable {
 			 username = conn.getOis().readObject().toString();
 		}
 		
-		sendMessage("Welcome, " + username + " \n" + "Commands are: /broadcast, /online, /close, /ping", conn);
+		sendMessage("Welcome, " + username + " \n" + "Commands are: /broadcast, /online, /close, /ping, /msg", conn);
 		
 		return username;
 	}
