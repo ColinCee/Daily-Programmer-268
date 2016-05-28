@@ -1,9 +1,8 @@
 # Daily-Programmer-268
-https://www.reddit.com/r/dailyprogrammer/comments/4knivr/20160523_challenge_268_easy_network_and_cards/
+This is a Java implementation of the daily challenge, it is multithreaded server that has some of the bonuses as shown below:
 
 ----- Easy -----
-
-This is a Java implementation of the daily challenge, it is multithreaded server that has some of the bonuses as shown below:
+https://www.reddit.com/r/dailyprogrammer/comments/4knivr/20160523_challenge_268_easy_network_and_cards/
 
 Make the server broadcast it's existince on the network, so clients can detect him. - Requires research
 
@@ -15,3 +14,8 @@ Create a way to list all connected clients - Yep
 
 Send messages to the server and relay it to a requested client - Yep
 
+----- Intermediate -----
+
+https://www.reddit.com/r/dailyprogrammer/comments/4kz0e0/20160525_challenge_268_intermediate_network_and/
+
+No bonuses, only the basic structure.
