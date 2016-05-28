@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Connection {
 	private Socket socket;
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
+
 	
 	public Connection(Socket socket) throws IOException{
 		this.socket = socket;

@@ -16,6 +16,7 @@ import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,37 +25,74 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import blackjack.Deck;
+
 public class Server {
 
-	private Map<String, Connection> clientMap;
-
+	private Map<User, Connection> clientMap;
     private SimpleDateFormat sdf;
+    private Deck deck;
+    private GameThread gameThread;
+    
 	public Server() throws IOException {
 
-		clientMap = new HashMap<String, Connection>();
-		
+		clientMap = new HashMap<User, Connection>();
 		sdf = new SimpleDateFormat("'['dd.MM HH:mm:ss']'");
-
+		deck = new Deck();
+		gameThread = new GameThread(this);
+		
 	}
 
-	public synchronized Map<String, Connection> getClientMap() {
+	public synchronized Map<User, Connection> getClientMap() {
 		return clientMap;
 	}
 
-	public synchronized boolean addUser(String username, Connection conn) throws IOException, ClassNotFoundException {
+	public Deck getDeck() {
+		return deck;
+	}
 
-		if (!clientMap.containsKey(username)) {
-			System.out.println(getTimeStamp() + " User: " + username + " connected");
-			clientMap.put(username, conn);
+	public GameThread getGameThread() {
+		return gameThread;
+	}
+
+	public synchronized boolean addUser(User user, Connection conn) throws IOException, ClassNotFoundException {
+		
+		if (!clientMap.containsKey(user)) {
+			System.out.println(getTimeStamp() + " User: " + user.getUsername() + " connected");
+			clientMap.put(user, conn);
 			return true;
 		} else
 			return false;
 
 	}
 
-	public synchronized void deleteUser(String username) {
-		System.out.println(getTimeStamp() + " User: " + username + " disconnected");
-		clientMap.remove(username);
+	public synchronized void deleteUser(User user) {
+		System.out.println(getTimeStamp() + " User: " + user.getUsername() + " disconnected");
+		clientMap.remove(user);
+	}
+	
+	public synchronized boolean checkAllReady(){
+		boolean ready = true;
+		int count = 0;
+		for(User user : clientMap.keySet()){
+			if(!user.isStart()){
+				ready = false;
+				break;
+			}
+			count++;
+		}
+		
+		if(count > 1)
+			return ready;
+		else 
+			return false;
+		
+	}
+
+	public void startGame() {
+		
+		Thread thread = new Thread(gameThread);
+		thread.start();
 	}
 	
 	public String getTimeStamp(){
@@ -76,7 +114,8 @@ public class Server {
 			// While true loop allows the class to accept any clients on port 10
 			while (true) {
 				Socket cSock = serverSock.accept();
-				executor.execute(new ServerThread(cSock, server));
+				Connection conn = new Connection(cSock);
+				executor.execute(new ServerThread(conn, server));
 			}
 		} catch (IOException e) {
 			System.err.println("IOException: " + e.getMessage());
@@ -89,4 +128,5 @@ public class Server {
 			}
 		}
 	}
+
 }
