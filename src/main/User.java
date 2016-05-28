@@ -8,10 +8,10 @@ import blackjack.Card;
 public class User implements Comparable<User> {
 	
 	private String username;
+	private boolean pass;
 	private boolean start;
 	private long startTime;
 	private List<Card> currentHand;
-	private boolean pass;
 	private List<String> commandHistory;
 	
 	public User(String username){
@@ -35,17 +35,12 @@ public class User implements Comparable<User> {
 	public void setStart(boolean start) {
 		this.start = start;
 		if(start)
-			setStartTime(System.currentTimeMillis());
+			startTime = System.currentTimeMillis();
 	}
 	
 	public long getStartTime() {
 		return startTime;
 	}
-
-	public void setStartTime(long startTime) {
-		this.startTime = startTime;
-	}
-
 	public List<Card> getCurrentHand() {
 		return currentHand;
 	}
@@ -80,7 +75,11 @@ public class User implements Comparable<User> {
 		return value;
 		
 	}
-
+	
+	public void resetGame(){
+		start = false;
+		currentHand.clear();
+	}
 
 	@Override
 	public int hashCode() {

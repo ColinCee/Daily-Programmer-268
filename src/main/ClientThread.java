@@ -24,10 +24,10 @@ public class ClientThread implements Runnable {
 					StringTokenizer st = new StringTokenizer(response);
 					st.nextToken();
 					long sendTime = Long.parseLong(st.nextToken());
-					System.out.println("Response time: " + (receiveTime - sendTime) + " ms");
+					client.print("Response time: " + (receiveTime - sendTime) + " ms");
 				}
 				else
-					System.out.println(response);
+					client.print(response);
 			}
 		} catch (ClassNotFoundException | IOException e) {
 			// TODO Auto-generated catch block

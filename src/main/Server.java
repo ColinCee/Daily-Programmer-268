@@ -58,7 +58,7 @@ public class Server {
 	public synchronized boolean addUser(User user, Connection conn) throws IOException, ClassNotFoundException {
 		
 		if (!clientMap.containsKey(user)) {
-			System.out.println(getTimeStamp() + " User: " + user.getUsername() + " connected");
+			print(" User: " + user.getUsername() + " connected");
 			clientMap.put(user, conn);
 			return true;
 		} else
@@ -66,8 +66,9 @@ public class Server {
 
 	}
 
+
 	public synchronized void deleteUser(User user) {
-		System.out.println(getTimeStamp() + " User: " + user.getUsername() + " disconnected");
+		print(getTimeStamp() + " User: " + user.getUsername() + " disconnected");
 		clientMap.remove(user);
 	}
 	
@@ -89,13 +90,31 @@ public class Server {
 		
 	}
 
+	//Send the broadcasted message to each user except the one who sent the command
+	public void broadcast(User sender, String broadcastMsg) throws IOException {
+		//Null implies server wide broadcast
+		for(User user : clientMap.keySet())
+			if(sender == null || !user.equals(sender))
+				sendMessage(broadcastMsg, clientMap.get(user));
+		
+	}
+	//Send a message to the outputstream in conn
+	public void sendMessage(String message, Connection conn) throws IOException{		
+		conn.getOos().writeObject(message);
+	}
+	//Start the game in another thread of execution
 	public void startGame() {
 		
 		Thread thread = new Thread(gameThread);
 		thread.start();
 	}
-	
-	public String getTimeStamp(){
+	//Print statements should have a time stamp
+	public void print(String message) {
+		System.out.println(getTimeStamp() + " " +  message);
+		
+	}
+
+	private String getTimeStamp(){
 		Date date = new Date();
 		return(sdf.format(date));
 	}
@@ -110,7 +129,7 @@ public class Server {
 			Server server = new Server();
 			// Create new server socket at port 10
 			serverSock = new ServerSocket(port);
-			System.out.println(server.getTimeStamp() + " Waiting for Client on Port: " + serverSock.getLocalPort());
+			server.print(" Waiting for Client on Port: " + serverSock.getLocalPort());
 			// While true loop allows the class to accept any clients on port 10
 			while (true) {
 				Socket cSock = serverSock.accept();

@@ -10,6 +10,8 @@
 package main;
 
 import java.net.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -20,36 +22,38 @@ public class Client {
 	private ObjectOutputStream objectOutput;
 	private ObjectInputStream objectInput;
 	private Scanner scan;
-
+	private SimpleDateFormat sdf;
+	
 	public Client(String ip, int port) throws IOException, ClassNotFoundException{
 		socket = new Socket(ip, port);
 		objectOutput = new ObjectOutputStream(socket.getOutputStream());
 		objectInput = new ObjectInputStream(socket.getInputStream());
 		scan = new Scanner(System.in);
+		sdf = new SimpleDateFormat("'['HH:mm:ss']'");
 		setUsername();
 	}
 	
 	public void setUsername() throws ClassNotFoundException, IOException{
 
 		String message = "";
-		System.out.println("Please enter your username:");
+		print("Please enter your username:");
 		sendMessage(scan.nextLine());
 		String response = getServerResponse();
-		System.out.println(response);
+		print(response);
 		
 		while(response.contains("taken")){
-			System.out.println("Please enter another username: ");
+			print("Please enter another username: ");
 			message = scan.nextLine();
 			sendMessage(message);
 			response = getServerResponse();
-			System.out.println(response);
+			print(response);
 		}
 		
 	}
 	
 	public void pingServer() throws IOException, ClassNotFoundException{
 		long startTime = System.currentTimeMillis();
-		System.out.println("Pinging...");
+		print("Pinging...");
 		sendMessage("/ping " + startTime);
 
 	}
@@ -62,10 +66,6 @@ public class Client {
 
 		return objectInput.readObject().toString();
 	}
-
-	public Socket getSocket() {
-		return socket;
-	}
 	
 	public Scanner getScanner() {
 		return scan;
@@ -77,7 +77,17 @@ public class Client {
 		objectInput.close();
 		socket.close();
 	}
+	
+	public void print(String message){
+		System.out.println(getTimeStamp() + " " +  message);
+	}
+	
 
+	private String getTimeStamp(){
+		Date date = new Date();
+		return(sdf.format(date));
+	}
+	
 	public static void main(String[] args) {
 
 		try {
@@ -97,7 +107,7 @@ public class Client {
 					client.pingServer();
 				else{
 					while (message.isEmpty()) {
-						System.out.println("Input is empty please try again:");
+						client.print("Input is empty please try again:");
 						message = scan.nextLine();
 					}
 
@@ -107,7 +117,7 @@ public class Client {
 
 			} while (!message.contains("/close"));
 
-			System.out.println("Exiting...");
+			client.print("Exiting...");
 			client.sendMessage("/close");
 			scan.close();
 			
