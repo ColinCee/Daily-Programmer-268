@@ -18,4 +18,4 @@ Send messages to the server and relay it to a requested client - Yep
 
 https://www.reddit.com/r/dailyprogrammer/comments/4kz0e0/20160525_challenge_268_intermediate_network_and/
 
-No bonuses, only the basic structure.
+Send all the events to other clients in the form CLIENT A takes a Queen of Hearts or Client A passes - Yep
