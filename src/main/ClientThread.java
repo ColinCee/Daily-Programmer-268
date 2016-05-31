@@ -13,16 +13,15 @@ public class ClientThread implements Runnable {
 	
 	@Override
 	public void run() {
-
+		
 		try {
 			while(!Thread.currentThread().isInterrupted()){
 				String response = client.getServerResponse();
+				StringTokenizer st = new StringTokenizer(response);
 				long receiveTime = System.currentTimeMillis();
 				if(response.contains("Closing"))
 					client.closeConnection();
-				else if(response.contains("ping")){
-					StringTokenizer st = new StringTokenizer(response);
-					st.nextToken();
+				else if(st.nextToken().equals("/ping")){
 					long sendTime = Long.parseLong(st.nextToken());
 					client.print("Response time: " + (receiveTime - sendTime) + " ms");
 				}

@@ -77,6 +77,9 @@ public class GameThread implements Runnable {
 		server.broadcast(null, "Game over!");
 		for(User user : users)
 			user.resetGame();
+		users.clear();
+		blockingMap.clear();
+		deck.resetDeck();
 	}
 
 	private void parseCommands(String message, User user, Connection conn) throws IOException, ClassNotFoundException {

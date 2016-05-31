@@ -24,7 +24,6 @@ public class ServerThread implements Runnable {
 		try {
 			server.print(" Client connection established to: " + conn.getSocket().getRemoteSocketAddress());
 			
-			
 			User newUser = addNewUser();
 			String message = "";
 			while(!message.contains("/close")){
@@ -49,6 +48,10 @@ public class ServerThread implements Runnable {
 			case "/start":
 				//Start game here
 				cmdStart(user);
+				break;
+			case "/command":
+				String commands = "Commands are: /command, /broadcast, /online, /close, /ping, /msg, /start";
+				server.sendMessage(commands, conn);
 				break;
 			case "/broadcast":	
 				String broadcastMsg = "Server wide brodcast: ";
@@ -86,6 +89,11 @@ public class ServerThread implements Runnable {
 		}
 	}
 	
+	private void cmdCommand() {
+		
+		
+	}
+
 	private void cmdStart(User user) throws IOException, InterruptedException {
 		// TODO Auto-generated method stub
 		if(user.isStart()){
@@ -147,8 +155,8 @@ public class ServerThread implements Runnable {
 			 user = new User(username);
 		}
 		String message = "Welcome, " + username + " \n";
-		message += "Commands are: /broadcast, /online, /close, /ping, /msg \n";
-		message += "Type /start to initiate a game of blackjack";
+		message += "Type /command to view the list of commands \n";
+		message += "Type /start to initiate a game of blackjack ";
 		server.sendMessage(message, conn);
 		
 		return user;
